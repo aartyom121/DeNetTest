@@ -133,25 +133,3 @@ def get_transaction_history(address, limit=10):
         return transactions[:limit]
     else:
         return []
-
-
-def get_top_addresses(limit=10):
-    API_KEY = os.getenv('POLYGONSCAN_API_KEY')
-    url = f"https://api.polygonscan.com/api?module=account&action=tokenholderlist&contractaddress={TOKEN_ADDRESS}&page=1&offset={limit}&sort=desc&apikey={API_KEY}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        holders = response.json().get('result', [])
-        return [(holder['address'], int(holder['balance']) / (10 ** token_contract.functions.decimals().call())) for
-                holder in holders]
-    else:
-        return []
-
-
-def get_top_addresses_with_transactions(limit=10):
-    holders = get_top_addresses(limit)
-    top_addresses_with_transactions = []
-    for address, balance in holders:
-        transactions = get_transaction_history(address, limit=1)
-        last_transaction_date = transactions[0]['timeStamp'] if transactions else None
-        top_addresses_with_transactions.append((address, balance, last_transaction_date))
-    return top_addresses_with_transactions
